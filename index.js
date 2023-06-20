@@ -19,8 +19,8 @@ app.post("/docker/port/:port/setup", function (req, res) {
 
         const container = containers.find(c => c.Names.includes('/superchat-' + port.toString()));
 
-        if (container) {
-            return res.json('Container is running'); 
+        if (container) { 
+            return res.status(400).send({ message: 'Container is running.' }); 
         }
 
         const createOpts = {
@@ -47,8 +47,8 @@ app.post("/docker/port/:port/setup", function (req, res) {
                 if (err) {
                     return res.json(err); 
                 }
-
-                //res.json(data);
+ 
+                return res.status(201).send({ message: 'New resource has been created.' }); 
             });
         });
     });
