@@ -6,9 +6,9 @@ const Docker = require('dockerode');
 const docker = new Docker();;
 const port = 5000
 
-app.get('/', (req, res) => res.json("Connected"))
+app.get('/', (req, res) => res.json("OK"))
 
-app.post("/container/:container/port/:port/setup", function (req, res) {
+app.post("/docker/port/:port/setup", function (req, res) {
 
     let port = req.params.port;
 
@@ -17,7 +17,7 @@ app.post("/container/:container/port/:port/setup", function (req, res) {
             return res.json(err); 
         }
 
-        const container = containers.find(c => c.Names.includes('/superchat-' + req.params.container));
+        const container = containers.find(c => c.Names.includes('/superchat-' + port.toString()));
 
         if (container) {
             return res.json('Container is running'); 
@@ -25,7 +25,7 @@ app.post("/container/:container/port/:port/setup", function (req, res) {
 
         const createOpts = {
             Image: 'superchat:latest',
-            name: 'superchat-' + req.params.container,
+            name: 'superchat-' + port.toString(),
             ExposedPorts: {
                 "3000/tcp": {}
             },
