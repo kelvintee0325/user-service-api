@@ -2,4 +2,4 @@ FROM node:latest
 WORKDIR /app
 ADD . .
 RUN npm install
-CMD node chat.js
+CMD node index.js
