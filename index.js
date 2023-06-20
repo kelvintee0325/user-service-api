@@ -33,6 +33,7 @@ app.post("/container/:container/port/:port/setup", function (req, res) {
             }  
         }, function (err) {
             res.json(err);
+            return;
         })
 
         const createOpts = {
