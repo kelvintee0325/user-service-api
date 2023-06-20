@@ -2,37 +2,42 @@ const express = require('express')
 const { exec } = require('child_process');
 const app = express()
 const Docker = require('dockerode');
+const tcp_port_used = require('tcp-port-used');
 
 const docker = new Docker();;
 const port = 5000
 
-app.get('/', (req, res) => res.json([{
-    "name": "bob",
-    "email": "bob@gmail.com"
-}]))
+app.get('/', (req, res) => res.json("Connected"))
 
-app.get("/:session/container/setup", function (req, res) {
+app.post("/container/:container/port/:port/setup", function (req, res) {
 
-    let port = req.query.port;
+    let port = req.params.port;
 
     docker.listContainers({ all: true }, (err, containers) => {
         if (err) {
-            console.error(err);
             res.json(err);
             return;
         }
 
-        const container = containers.find(c => c.Names.includes('/superchat-' + req.params.session));
+        const container = containers.find(c => c.Names.includes('/superchat-' + req.params.container));
 
         if (container) {
-            console.error('Container is running');
             res.json('Container is running');
             return;
         }
 
+        tcp_port_used.check(port, '127.0.0.1').then(function (e) {
+            if (e == true) {
+                res.json('Port is already allocated');
+                return;
+            }  
+        }, function (err) {
+            res.json(err);
+        })
+
         const createOpts = {
             Image: 'superchat:latest',
-            name: 'superchat-' + req.params.session,
+            name: 'superchat-' + req.params.container,
             ExposedPorts: {
                 "3000/tcp": {}
             },
@@ -46,21 +51,18 @@ app.get("/:session/container/setup", function (req, res) {
         };
 
         docker.createContainer(createOpts, function (err, container) {
-            if (err) {
-                console.error(err);
+            if (err) { 
                 res.json(err);
                 return;
             }
 
             container.start(function (err, data) {
-                if (err) {
-                    console.error(err);
+                if (err) { 
                     res.json(err);
                     return;
                 }
-
-                console.log(data);
-                res.json(data); 
+ 
+                res.json(data);
             });
         });
     });
@@ -76,5 +78,5 @@ app.get("/:session/container/setup", function (req, res) {
 })
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+    console.log(`App listening on port ${port}`)
 })
