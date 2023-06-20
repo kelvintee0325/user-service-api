@@ -26,16 +26,16 @@ app.post("/container/:container/port/:port/setup", function (req, res) {
             return;
         }
 
-        tcp_port_used.check(port).then(function (e) {
-            res.json(e);
-            if (e == true) {
-                res.json('Port is already allocated');
-                return;
-            }  
-        }, function (err) {
-            res.json(err);
-            return;
-        })
+        // tcp_port_used.check(port).then(function (e) {
+        //     res.json(e);
+        //     if (e == true) {
+        //         res.json('Port is already allocated');
+        //         return;
+        //     }  
+        // }, function (err) {
+        //     res.json(err);
+        //     return;
+        // })
 
         const createOpts = {
             Image: 'superchat:latest',
