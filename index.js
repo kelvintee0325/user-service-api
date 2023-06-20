@@ -2,13 +2,13 @@ const express = require('express')
 const { exec } = require('child_process');
 const app = express()
 const Docker = require('dockerode');
-const net = require('net');
+const tcp_port_used = require('tcp-port-used');
 
 const docker = new Docker();;
 const port = 5000
 
 app.get('/', (req, res) => res.json("Connected"))
- 
+
 app.post("/container/:container/port/:port/setup", function (req, res) {
 
     let port = req.params.port;
@@ -26,19 +26,16 @@ app.post("/container/:container/port/:port/setup", function (req, res) {
             return;
         }
 
-        checkPortAvailability(port)
-        .then((isAvailable) => {
-          if (isAvailable) {
-            console.log(`Port ${port} is available.`);
-          } else {
-            console.log(`Port ${port} is not available.`);
+        tcp_port_used.check(port, "0.0.0.0").then(function (e) {
+            res.json(e);
+            if (e == true) {
+                res.json('Port is already allocated');
+                return;
+            }  
+        }, function (err) {
+            res.json(err);
             return;
-          }
         })
-        .catch((error) => {
-            res.json('Error occurred while checking port availability:', error);
-            return;
-        });
 
         const createOpts = {
             Image: 'superchat:latest',
@@ -85,20 +82,3 @@ app.post("/container/:container/port/:port/setup", function (req, res) {
 app.listen(port, () => {
     console.log(`App listening on port ${port}`)
 })
-
-function checkPortAvailability(port) {
-    return new Promise((resolve) => {
-      const server = net.createServer();
-  
-      server.on('error', () => {
-        resolve(false); // Port is not available
-      });
-  
-      server.listen(port, '127.0.0.1', () => {
-        server.close(() => {
-          resolve(true); // Port is available
-        });
-      });
-    });
-  }
-  
