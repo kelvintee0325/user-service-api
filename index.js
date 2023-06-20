@@ -35,7 +35,8 @@ app.post("/docker/port/:port/setup", function (req, res) {
                         HostPort: port.toString()
                     }],
                 },
-            },
+                Binds: [`${process.cwd()}/tokens:/app/tokens`],
+            }, 
         };
 
         docker.createContainer(createOpts, function (err, container) {
