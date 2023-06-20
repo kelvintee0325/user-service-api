@@ -15,32 +15,28 @@ app.post("/container/:container/port/:port/setup", function (req, res) {
 
     docker.listContainers({ all: true }, (err, containers) => {
         if (err) {
-            res.json(err);
-            return;
+            return res.json(err); 
         }
 
         const container = containers.find(c => c.Names.includes('/superchat-' + req.params.container));
 
         if (container) {
-            res.json('Container is running');
-            return;
+            return res.json('Container is running'); 
         }
 
         checkPortAvailability(port)
             .then((isAvailable) => {
                 if (isAvailable) {
-                    console.log(`Port ${port} is available.`);
+                    return res.json(`Port ${port} is available.`);
                 } else {
-                    console.log(`Port ${port} is not available.`);
-                    return;
+                    return res.json(`Port ${port} is not available.`);
                 }
             })
             .catch((error) => {
-                console.error('Error occurred while checking port availability:', error);
-                return;
+                return res.json('Error occurred while checking port availability:', error); 
             });
 
-            console.log("help");
+              res.json("help");
 
         const createOpts = {
             Image: 'superchat:latest',
@@ -59,14 +55,12 @@ app.post("/container/:container/port/:port/setup", function (req, res) {
 
         docker.createContainer(createOpts, function (err, container) {
             if (err) {
-                res.json(err);
-                return;
+                return res.json(err); 
             }
 
             container.start(function (err, data) {
                 if (err) {
-                    res.json(err);
-                    return;
+                    return res.json(err); 
                 }
 
                 //res.json(data);
