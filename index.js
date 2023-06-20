@@ -2,7 +2,7 @@ const express = require('express')
 const { exec } = require('child_process');
 const app = express()
 const Docker = require('dockerode');
-const tcp_port_used = require('tcp-port-used');
+const net = require('net');
 
 const docker = new Docker();;
 const port = 5000
@@ -26,16 +26,21 @@ app.post("/container/:container/port/:port/setup", function (req, res) {
             return;
         }
 
-        tcp_port_used.check(port, "0.0.0.0").then(function (e) {
-            res.json(e);
-            if (e == true) {
-                res.json('Port is already allocated');
+        checkPortAvailability(port)
+            .then((isAvailable) => {
+                if (isAvailable) {
+                    console.log(`Port ${port} is available.`);
+                } else {
+                    console.log(`Port ${port} is not available.`);
+                    return;
+                }
+            })
+            .catch((error) => {
+                console.error('Error occurred while checking port availability:', error);
                 return;
-            }  
-        }, function (err) {
-            res.json(err);
-            return;
-        })
+            });
+
+            console.log("help");
 
         const createOpts = {
             Image: 'superchat:latest',
@@ -53,17 +58,17 @@ app.post("/container/:container/port/:port/setup", function (req, res) {
         };
 
         docker.createContainer(createOpts, function (err, container) {
-            if (err) { 
+            if (err) {
                 res.json(err);
                 return;
             }
 
             container.start(function (err, data) {
-                if (err) { 
+                if (err) {
                     res.json(err);
                     return;
                 }
- 
+
                 //res.json(data);
             });
         });
@@ -82,3 +87,19 @@ app.post("/container/:container/port/:port/setup", function (req, res) {
 app.listen(port, () => {
     console.log(`App listening on port ${port}`)
 })
+
+function checkPortAvailability(port) {
+    return new Promise((resolve) => {
+        const server = net.createServer();
+
+        server.on('error', () => {
+            resolve(false); // Port is not available
+        });
+
+        server.listen(port, '127.0.0.1', () => {
+            server.close(() => {
+                resolve(true); // Port is available
+            });
+        });
+    });
+}
