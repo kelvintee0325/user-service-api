@@ -24,7 +24,7 @@ app.post("/docker/port/:port/setup", function (req, res) {
         }
 
         const createOpts = {
-            Image: 'superchat:latest',
+            Image: 'superchat:20231226',
             name: 'superchat-' + port.toString(),
             ExposedPorts: {
                 "3000/tcp": {}
@@ -36,6 +36,7 @@ app.post("/docker/port/:port/setup", function (req, res) {
                     }],
                 },
                 Binds: [`${process.cwd()}/tokens:/app/tokens`],
+                Memory: 2 * 1024 * 1024 * 1024,
             }, 
         };
 
@@ -63,7 +64,7 @@ app.post("/docker/port/:port/setup", function (req, res) {
     //     console.error(`stderr: ${stderr}`);
     // });
 })
-
+ 
 app.listen(port, () => {
     console.log(`App listening on port ${port}`)
 })
