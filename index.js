@@ -109,7 +109,7 @@ app.put("/docker/port/:port/stop", function (req, res) {
     //     console.error(`stderr: ${stderr}`);
     // });
 })
-
+ 
 app.delete("/docker/port/:port/remove", function (req, res) { 
     let port = req.params.port;
  
@@ -132,7 +132,7 @@ app.delete("/docker/port/:port/remove", function (req, res) {
             if (remove_err) {
                 return res.status(400).send({ Message: stop_err.toString() }); 
             } else { 
-                return res.status(204).send({ Message: 'The resource was successfully deleted.' }); 
+                return res.status(200).send({ Message: 'The resource was successfully deleted.' }); 
             }
         });
     });
