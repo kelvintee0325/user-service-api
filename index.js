@@ -64,8 +64,8 @@ app.post("/docker/port/:port/setup", function (req, res) {
     //     console.error(`stderr: ${stderr}`);
     // });
 })
-
-app.post("/docker/port/:port/remove", function (req, res) { 
+ 
+app.put("/docker/port/:port/stop", function (req, res) { 
     let port = req.params.port;
  
     docker.listContainers({ all: true }, (err, containers) => {
@@ -87,13 +87,15 @@ app.post("/docker/port/:port/remove", function (req, res) {
             if (stop_err) {
                 return res.status(400).send({ Message: stop_err.toString() }); 
             } else { 
-                containerObj.remove(function (remove_err, data) {
-                    if (remove_err) {
-                        return res.status(400).send({ Message: remove_err.toString() }); 
-                    } else {
-                        return res.status(204).send({ Message: 'The resource was successfully deleted.' });
-                    }
-                });
+                return res.status(200).send({ Message: 'The resource was successfully stop.' });
+
+                // containerObj.remove(function (remove_err, data) {
+                //     if (remove_err) {
+                //         return res.status(400).send({ Message: remove_err.toString() }); 
+                //     } else {
+                //         return res.status(204).send({ Message: 'The resource was successfully deleted.' });
+                //     }
+                // });
             }
         });
     });
