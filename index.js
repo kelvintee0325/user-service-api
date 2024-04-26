@@ -37,6 +37,9 @@ app.post("/docker/port/:port/setup", function (req, res) {
                 },
                 Binds: [`${process.cwd()}/tokens:/app/tokens`],
                 Memory: 2 * 1024 * 1024 * 1024,
+                RestartPolicy: {
+                    Name: 'always' // Restart policy
+                }
             },
         };
 
@@ -64,29 +67,29 @@ app.post("/docker/port/:port/setup", function (req, res) {
     //     console.error(`stderr: ${stderr}`);
     // });
 })
- 
-app.put("/docker/port/:port/stop", function (req, res) { 
+
+app.put("/docker/port/:port/stop", function (req, res) {
     let port = req.params.port;
- 
+
     docker.listContainers({ all: true }, (err, containers) => {
         if (err) {
             return res.json(err);
         }
 
         const container_info = containers.find(c => c.Names.includes('/superchat-' + port.toString()));
- 
+
         if (!container_info) {
             return res.status(400).send({ Message: 'Container is not available.' });
         }
- 
+
         const container_id = container_info.Id;
 
         const container = docker.getContainer(container_id);
 
         container.stop(function (stop_err) {
             if (stop_err) {
-                return res.status(400).send({ Message: stop_err.toString() }); 
-            } else { 
+                return res.status(400).send({ Message: stop_err.toString() });
+            } else {
                 return res.status(200).send({ Message: 'The resource was successfully stop.' });
 
                 // containerObj.remove(function (remove_err, data) {
@@ -109,30 +112,30 @@ app.put("/docker/port/:port/stop", function (req, res) {
     //     console.error(`stderr: ${stderr}`);
     // });
 })
- 
-app.delete("/docker/port/:port/remove", function (req, res) { 
+
+app.delete("/docker/port/:port/remove", function (req, res) {
     let port = req.params.port;
- 
+
     docker.listContainers({ all: true }, (err, containers) => {
         if (err) {
             return res.json(err);
         }
 
         const container_info = containers.find(c => c.Names.includes('/superchat-' + port.toString()));
- 
+
         if (!container_info) {
             return res.status(400).send({ Message: 'Container is not available.' });
         }
- 
+
         const container_id = container_info.Id;
 
         const container = docker.getContainer(container_id);
 
         container.remove(function (remove_err) {
             if (remove_err) {
-                return res.status(400).send({ Message: stop_err.toString() }); 
-            } else { 
-                return res.status(200).send({ Message: 'The resource was successfully deleted.' }); 
+                return res.status(400).send({ Message: stop_err.toString() });
+            } else {
+                return res.status(200).send({ Message: 'The resource was successfully deleted.' });
             }
         });
     });
